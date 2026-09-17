@@ -1,0 +1,87 @@
+# ==============================================================================
+# CODE SENTINEL - ENTERPRISE .GITIGNORE
+# Strictly protects secrets, encrypted archives, databases, and build artifacts
+# ==============================================================================
+
+# Secrets & Environment Files (NEVER COMMIT)
+.env
+.env.*
+!.env.example
+secrets/
+*.kdbx
+*.key
+*.pem
+*.p12
+*.pfx
+credentials.*
+secrets.*
+
+# Encrypted Backups, Restores & Local Archives
+backups/
+*.enc
+scratch/
+*.tar.gz
+*.zip
+*.7z
+
+# Database & SQLite State
+*.sqlite
+*.sqlite3
+*.sqlite-shm
+*.sqlite-wal
+*.db
+*.db-shm
+*.db-wal
+postgres_data/
+
+# OpenCode Local Storage & Data
+.local/
+storage/
+
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+.yarn/
+
+# Testing & Coverage
+/coverage
+.nyc_output/
+
+# Next.js & Build Outputs
+/.next/
+/out/
+/build
+*.tsbuildinfo
+next-env.d.ts
+
+# CLI Distribution Artifacts
+dist/*
+!dist/index.js
+
+# Logs & Runtime
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS & IDE Files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Cloud & Deployment Temporary Files
+.vercel
+.serena/
+qiita/
+RELEASE_WORKFLOW.md
