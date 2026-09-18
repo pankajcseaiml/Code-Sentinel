@@ -63,13 +63,17 @@ def run_keepassxc(cli, args, input_data=""):
     )
     return proc
 
-def init_vault(cli, vault_path, password):
+def init_vault(cli, vault_path, password, force=False):
     """Initialize a new KeePassXC database."""
     vault_path = Path(vault_path)
     vault_path.parent.mkdir(parents=True, exist_ok=True)
     if vault_path.exists():
-        print(f"Vault already exists at {vault_path}")
-        return
+        if force:
+            print(f"Removing old vault at {vault_path} to reset...")
+            vault_path.unlink()
+        else:
+            print(f"Vault already exists at {vault_path}")
+            return
     
     input_data = f"{password}\n{password}\n"
     proc = run_keepassxc(cli, ["db-create", "-p", str(vault_path)], input_data)
@@ -116,14 +120,14 @@ def list_entries(cli, vault_path, password):
     lines = [line.strip().lstrip("/") for line in proc.stdout.splitlines() if line.strip()]
     return lines
 
-def import_from_env(cli, vault_path, env_path, password):
+def import_from_env(cli, vault_path, env_path, password, force=False):
     """Import secrets from existing local .env file."""
     env_path = Path(env_path)
     if not env_path.exists():
         print(f"Source env file not found at {env_path}", file=sys.stderr)
         sys.exit(1)
         
-    init_vault(cli, vault_path, password)
+    init_vault(cli, vault_path, password, force=force)
     
     count = 0
     with open(env_path, "r", encoding="utf-8") as f:
@@ -171,6 +175,7 @@ def main():
                         help="Action to perform")
     parser.add_argument("--vault", default=str(DEFAULT_VAULT_PATH), help="Path to .kdbx file")
     parser.add_argument("--env", default=str(DEFAULT_ENV_PATH), help="Path to .env file")
+    parser.add_argument("-f", "--force", action="store_true", help="Force overwrite existing vault (reset password)")
     args = parser.parse_args()
     
     cli = find_keepassxc_cli()
@@ -180,10 +185,10 @@ def main():
         
     if args.command == "init":
         pwd = get_master_password(confirm=True)
-        init_vault(cli, args.vault, pwd)
+        init_vault(cli, args.vault, pwd, force=args.force)
     elif args.command == "import-env":
-        pwd = get_master_password(confirm=True if not Path(args.vault).exists() else False)
-        import_from_env(cli, args.vault, args.env, pwd)
+        pwd = get_master_password(confirm=True if (args.force or not Path(args.vault).exists()) else False)
+        import_from_env(cli, args.vault, args.env, pwd, force=args.force)
     elif args.command == "export-env":
         pwd = get_master_password(confirm=False)
         export_to_env(cli, args.vault, args.env, pwd)
